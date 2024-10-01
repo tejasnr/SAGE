@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SAGE - Your AI Mental Health Assistant</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600&display=swap');
+    
+    body {
+      font-family: 'Nunito', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #dff9fb, #c7ecee); /* Soft calming gradient */
+      margin: 0;
+      padding: 0;
+    }
+
+    #chat-container {
+      background-color: #ffffff;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+      width: 450px;
+      height: 600px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      animation: fadeIn 0.8s ease-in;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 15px;
+      font-family: 'Nunito', sans-serif;
+      color: #4A4A4A; /* Soft gray text for a calm feel */
+      font-weight: 600;
+      font-size: 24px;
+    }
+
+    #chat-history {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 15px;
+      background-color: #f7f9fa;
+      border-radius: 15px;
+      border: 1px solid #e6e6e6;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    /* Custom scrollbar */
+    #chat-history::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    #chat-history::-webkit-scrollbar-thumb {
+      background-color: #b0bec5;
+      border-radius: 6px;
+    }
+
+    .user-message, .bot-message {
+      border-radius: 15px;
+      margin-bottom: 20px; /* Increased space between user and bot messages */
+      display: inline-block;
+      max-width: 75%;
+      padding: 12px;
+      font-size: 14px;
+      animation: slideIn 0.3s ease-out;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .user-message {
+      text-align: right;
+      background: linear-gradient(135deg, #74b9ff, #0984e3); /* Softer gradient for user message */
+      color: white;
+      align-self: flex-end;
+    }
+
+    .bot-message {
+      text-align: left;
+      background-color: #ffeaa7;
+      color: #4A4A4A;
+      align-self: flex-start;
+    }
+
+    form {
+      display: flex;
+      align-items: center;
+      position: relative;
+      margin-top: 10px;
+    }
+
+    input {
+      flex-grow: 1;
+      padding: 15px;
+      border: 1px solid #b0bec5;
+      border-radius: 50px;
+      font-size: 14px;
+      transition: border-color 0.2s ease;
+      font-family: 'Nunito', sans-serif;
+      padding-left: 20px;
+      background-color: #f0f4f5;
+    }
+
+    input:focus {
+      border-color: #4dd0e1;
+      outline: none;
+    }
+
+    button {
+      background-color: #4dd0e1;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 30px;
+      margin-left: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #0984e3;
+      transform: translateY(-2px);
+    }
+
+    /* Loader styled inline with bot messages */
+    #loader {
+      display: none; /* Hide by default */
+      margin-left: 0; /* Align inline with bot messages */
+      padding-left: 5px;
+    }
+
+    @keyframes rotate {
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div id="chat-container">
+    <h1>SAGE</h1>
+    <div id="chat-history"></div>
+    <form id="chat-form">
+      <input type="text" id="user-input" placeholder="How are you feeling today?" />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+
+  <script>
+    const chatHistory = document.getElementById('chat-history');
+    const userInput = document.getElementById('user-input');
+    const form = document.getElementById('chat-form');
+
+    // Add the loader within chat history
+    let loader = document.createElement('div');
+    loader.id = 'loader';
+    loader.innerHTML = `<img src="loader.gif" width="50px" alt="Loading...">`;
+
+    async function sendMessage() {
+      const userMessage = userInput.value.trim(); // Prevent empty messages
+      if (!userMessage) return;
+
+      userInput.value = ''; // Clear input field
+
+      // Simulate user message
+      chatHistory.innerHTML += `<div class="user-message">${userMessage}</div>`;
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+
+      // Show loader inline with bot reply
+      chatHistory.appendChild(loader);
+      loader.style.display = 'block';
+      chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to show loader
+
+      try {
+        const response = await fetch('/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userInput: userMessage }),
+        });
+
+        const data = await response.json();
+        const botMessage = data.response;
+
+        // Remove loader and add bot reply
+        loader.style.display = 'none';
+        chatHistory.removeChild(loader); // Remove the loader from chat
+
+        // Add bot message
+        chatHistory.innerHTML += `<div class="bot-message">${botMessage}</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+      } catch (error) {
+        console.error('Error:', error);
+      }
+    }
+
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      sendMessage();
+    });
+  </script>
+</body>
+</html>
