@@ -26,11 +26,15 @@ Create a .env file and add your API key:
 
 
 API_KEY="Paste API Key here"
+
+
 Run the development server
 
 
 npm run dev
+
 📸 Preview
+
 Here are some screenshots of SAGE in action:
 
 <img width="1373" alt="Main Chat UI" src="https://github.com/user-attachments/assets/e8d9a713-ef85-45f4-b6c9-87edc9ba9fbf" /> <img width="589" alt="Chat UI Detail" src="https://github.com/user-attachments/assets/882cf6da-7229-433d-9911-1ba842c2e52b" />
